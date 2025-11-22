@@ -83,7 +83,8 @@ class _LauncherPageState extends State<LauncherPage> {
                   : filteredApps.isEmpty
                       ? _buildEmptyState()
                       : RefreshIndicator(
-                          onRefresh: widget.cubit.loadApps,
+                          onRefresh: () =>
+                              widget.cubit.loadApps(forceRefresh: true),
                           child: GridView.builder(
                             padding: const EdgeInsets.all(16),
                             gridDelegate:
@@ -158,9 +159,19 @@ class _LauncherPageState extends State<LauncherPage> {
           ),
           Row(
             children: [
+              // Cache indicator
+              if (widget.cubit.isCacheValid)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Icon(
+                    Icons.cloud_done,
+                    size: 16,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
               IconButton(
                 icon: const Icon(Icons.refresh),
-                onPressed: widget.cubit.loadApps,
+                onPressed: () => widget.cubit.loadApps(forceRefresh: true),
                 tooltip: 'Refresh apps',
               ),
               IconButton(

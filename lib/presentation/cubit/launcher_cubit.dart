@@ -14,7 +14,9 @@ class LauncherCubit extends ChangeNotifier {
     required this.getInstalledAppsUseCase,
     required this.launchAppUseCase,
     required this.openAppSettingsUseCase,
-  });
+  }) {
+    _loadFromCache();
+  }
 
   List<AppEntity> _apps = [];
   bool _isLoading = false;
@@ -25,6 +27,14 @@ class LauncherCubit extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String get searchQuery => _searchQuery;
+  bool get isCacheValid => getInstalledAppsUseCase.isCacheValid();
+
+  void _loadFromCache() {
+    final cachedApps = getInstalledAppsUseCase.getCachedApps();
+    if (cachedApps != null) {
+      _apps = cachedApps;
+    }
+  }
 
   List<AppEntity> get filteredApps {
     if (_searchQuery.isEmpty) {
@@ -40,13 +50,13 @@ class LauncherCubit extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadApps() async {
+  Future<void> loadApps({bool forceRefresh = false}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _apps = await getInstalledAppsUseCase();
+      _apps = await getInstalledAppsUseCase(forceRefresh: forceRefresh);
       _isLoading = false;
       notifyListeners();
     } catch (e) {
@@ -54,6 +64,12 @@ class LauncherCubit extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  void clearCache() {
+    getInstalledAppsUseCase.clearCache();
+    _apps = [];
+    notifyListeners();
   }
 
   Future<void> launchApp(AppEntity app) async {
