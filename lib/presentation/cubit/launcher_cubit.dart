@@ -3,31 +3,53 @@ import '../../domain/entities/app_entity.dart';
 import '../../domain/usecases/get_installed_apps_usecase.dart';
 import '../../domain/usecases/launch_app_usecase.dart';
 import '../../domain/usecases/open_app_settings_usecase.dart';
+import '../../domain/usecases/monitor_app_usage_usecase.dart';
 
 /// Cubit for managing launcher state
 class LauncherCubit extends ChangeNotifier {
   final GetInstalledAppsUseCase getInstalledAppsUseCase;
   final LaunchAppUseCase launchAppUseCase;
   final OpenAppSettingsUseCase openAppSettingsUseCase;
+  final MonitorAppUsageUseCase monitorAppUsageUseCase;
 
   LauncherCubit({
     required this.getInstalledAppsUseCase,
     required this.launchAppUseCase,
     required this.openAppSettingsUseCase,
+    required this.monitorAppUsageUseCase,
   }) {
     _loadFromCache();
+    monitorAppUsageUseCase.startMonitoring();
+  }
+
+  @override
+  void dispose() {
+    monitorAppUsageUseCase.stopMonitoring();
+    super.dispose();
   }
 
   List<AppEntity> _apps = [];
   bool _isLoading = false;
   String? _errorMessage;
   String _searchQuery = '';
+  bool _autoCloseEnabled = true;
 
   List<AppEntity> get apps => _apps;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String get searchQuery => _searchQuery;
   bool get isCacheValid => getInstalledAppsUseCase.isCacheValid();
+  bool get autoCloseEnabled => _autoCloseEnabled;
+
+  void toggleAutoClose() {
+    _autoCloseEnabled = !_autoCloseEnabled;
+    if (_autoCloseEnabled) {
+      monitorAppUsageUseCase.startMonitoring();
+    } else {
+      monitorAppUsageUseCase.stopMonitoring();
+    }
+    notifyListeners();
+  }
 
   void _loadFromCache() {
     final cachedApps = getInstalledAppsUseCase.getCachedApps();

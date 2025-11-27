@@ -5,6 +5,7 @@ import '../cubit/launcher_cubit.dart';
 import '../widgets/app_grid_item.dart';
 import '../widgets/app_options_bottom_sheet.dart';
 import '../widgets/search_bar.dart' as custom;
+import '../widgets/auto_close_indicator.dart';
 
 class LauncherPage extends StatefulWidget {
   final LauncherCubit cubit;
@@ -159,6 +160,26 @@ class _LauncherPageState extends State<LauncherPage> {
           ),
           Row(
             children: [
+              // Auto-close indicator
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: AutoCloseIndicator(
+                  isEnabled: widget.cubit.autoCloseEnabled,
+                  onTap: () {
+                    widget.cubit.toggleAutoClose();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          widget.cubit.autoCloseEnabled
+                              ? 'Auto-close enabled (30s limit)'
+                              : 'Auto-close disabled',
+                        ),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                ),
+              ),
               // Cache indicator
               if (widget.cubit.isCacheValid)
                 Padding(
@@ -178,8 +199,13 @@ class _LauncherPageState extends State<LauncherPage> {
                 icon: const Icon(Icons.settings),
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Settings coming soon!'),
+                    SnackBar(
+                      content: Text(
+                        'Auto-close: ${widget.cubit.autoCloseEnabled ? "ON" : "OFF"}\n'
+                        'Time limit: 30 seconds\n'
+                        'Tap timer icon to toggle',
+                      ),
+                      duration: const Duration(seconds: 3),
                     ),
                   );
                 },

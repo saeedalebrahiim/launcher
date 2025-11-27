@@ -6,4 +6,9 @@ class AppConstants {
   static const double gridChildAspectRatio = 0.8;
   static const double appIconSize = 56.0;
   static const double appIconBorderRadius = 12.0;
+
+  // App usage monitoring
+  static const int defaultAppTimeLimitSeconds = 30;
+  static const int minAppTimeLimitSeconds = 10;
+  static const int maxAppTimeLimitSeconds = 300; // 5 minutes
 }
